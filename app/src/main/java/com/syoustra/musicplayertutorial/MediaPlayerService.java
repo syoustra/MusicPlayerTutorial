@@ -11,10 +11,11 @@ import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import java.io.IOException;
 
-//TODO 2. Create the Media Player Service and related methods/binder inner class
+//TODO 2. Create the Media Player Service and basic shell of related methods/binder inner class
 public class MediaPlayerService extends Service implements
         MediaPlayer.OnCompletionListener,
         MediaPlayer.OnPreparedListener,
@@ -39,6 +40,8 @@ public class MediaPlayerService extends Service implements
         return iBinder;
     }
 
+
+    //TODO 9. Fill in the @Override methods with the actual code
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
         //Invoked indicating buffering status of a media resource being streamed over the internet
@@ -47,14 +50,26 @@ public class MediaPlayerService extends Service implements
     @Override
     public void onCompletion(MediaPlayer mp) {
         //Invoked when playback of a media source has completed
+        stopMedia();
+        //Stop the service
+        stopSelf();
     }
 
-
     //Handle errors
-
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
         //Invoked when there has been an error during an asynchronous operation
+        switch (what) {
+            case MediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK:
+                Log.d("Media Player Error", "MEDIA ERROR NOT VALID FOR PROGRESSIVE PLAYBACK " + extra);
+                break;
+            case MediaPlayer.MEDIA_ERROR_SERVER_DIED:
+                Log.d("Media Player Error", "MEDIA ERROR SERVER DIED " + extra);
+                break;
+            case MediaPlayer.MEDIA_ERROR_UNKNOWN:
+                Log.d("Media Player Error", "MEDIA ERROR UNKNOWN " + extra);
+                break;
+        }
         return false;
     }
 
@@ -67,6 +82,7 @@ public class MediaPlayerService extends Service implements
     @Override
     public void onPrepared(MediaPlayer mp) {
         //Invoked when the media source is ready for playback
+        playMusic();
     }
 
     @Override

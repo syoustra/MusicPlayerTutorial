@@ -1,6 +1,8 @@
 package com.syoustra.musicplayertutorial;
 
-/** TUTORIAL FROM https://www.sitepoint.com/a-step-by-step-guide-to-building-an-android-audio-player-app/ **/
+/**
+ * TUTORIAL FROM https://www.sitepoint.com/a-step-by-step-guide-to-building-an-android-audio-player-app/
+ **/
 
 import android.app.Service;
 import android.content.Intent;
@@ -28,6 +30,9 @@ public class MediaPlayerService extends Service implements
     //TODO 4. Create global instances of mediaPlayer and mediaFile
     private MediaPlayer mediaPlayer;
     private String mediaFile;
+
+    //TODO 6. Add global variable to store pause/resume position
+    private int resumePosition;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -82,7 +87,7 @@ public class MediaPlayerService extends Service implements
     }
 
     //TODO 5. Initialize mediaPlayer
-    private void initMediaPlayer(){
+    private void initMediaPlayer() {
         mediaPlayer = new MediaPlayer();
         //Set up MediaPlayer event listeners
         mediaPlayer.setOnCompletionListener(this);
@@ -104,5 +109,35 @@ public class MediaPlayerService extends Service implements
             stopSelf();
         }
         mediaPlayer.prepareAsync();
+    }
+
+    //TODO 8. Add if statements to make sure there are no problems while playing media
+    private void playMusic() {
+        if (!mediaPlayer.isPlaying()) {
+            mediaPlayer.start();
+        }
+    }
+
+    private void stopMedia() {
+        if (mediaPlayer == null) {
+            return;
+        }
+        if (mediaPlayer.isPlaying()) {
+            mediaPlayer.stop();
+        }
+    }
+
+    private void pauseMedia() {
+        if (mediaPlayer.isPlaying()) {
+            mediaPlayer.pause();
+            resumePosition = mediaPlayer.getCurrentPosition();
+        }
+    }
+
+    private void resumeMedia() {
+        if (!mediaPlayer.isPlaying()) {
+            mediaPlayer.seekTo(resumePosition);
+            mediaPlayer.start();
+        }
     }
 }

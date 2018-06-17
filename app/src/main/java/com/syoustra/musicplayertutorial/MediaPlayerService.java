@@ -1,6 +1,6 @@
 package com.syoustra.musicplayertutorial;
 
-// TUTORIAL FROM https://www.sitepoint.com/a-step-by-step-guide-to-building-an-android-audio-player-app/
+/** TUTORIAL FROM https://www.sitepoint.com/a-step-by-step-guide-to-building-an-android-audio-player-app/ **/
 
 import android.app.Service;
 import android.content.Intent;
@@ -8,15 +8,26 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
+import android.provider.MediaStore;
 
-public class MediaPlayerService extends Service implements MediaPlayer.OnCompletionListener,
-        MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnSeekCompleteListener,
-        MediaPlayer.OnInfoListener, MediaPlayer.OnBufferingUpdateListener,
+import java.io.IOException;
+
+//TODO 2. Create the Media Player Service and related methods/binder inner class
+public class MediaPlayerService extends Service implements
+        MediaPlayer.OnCompletionListener,
+        MediaPlayer.OnPreparedListener,
+        MediaPlayer.OnErrorListener,
+        MediaPlayer.OnSeekCompleteListener,
+        MediaPlayer.OnInfoListener,
+        MediaPlayer.OnBufferingUpdateListener,
         AudioManager.OnAudioFocusChangeListener {
 
     //Binder given to clients
     private final IBinder iBinder = new LocalBinder();
+
+    //TODO 4. Create global instances of mediaPlayer and mediaFile
+    private MediaPlayer mediaPlayer;
+    private String mediaFile;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -68,5 +79,30 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             return MediaPlayerService.this;
         }
 
+    }
+
+    //TODO 5. Initialize mediaPlayer
+    private void initMediaPlayer(){
+        mediaPlayer = new MediaPlayer();
+        //Set up MediaPlayer event listeners
+        mediaPlayer.setOnCompletionListener(this);
+        mediaPlayer.setOnErrorListener(this);
+        mediaPlayer.setOnPreparedListener(this);
+        mediaPlayer.setOnBufferingUpdateListener(this);
+        mediaPlayer.setOnSeekCompleteListener(this);
+        mediaPlayer.setOnInfoListener(this);
+        //Reset so that the media player is not pointing to another data source
+        mediaPlayer.reset();
+
+        //TODO 9999. FIX THIS, BECAUSE setAudioStreamType IS NEWLY DEPRECATED
+        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        try {
+            //Set the data source to the mediaFile location
+            mediaPlayer.setDataSource(mediaFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+            stopSelf();
+        }
+        mediaPlayer.prepareAsync();
     }
 }

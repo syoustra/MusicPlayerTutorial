@@ -20,6 +20,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- TODO 3. Declare the Service in the manifest.xml -->
         <service android:name=".MediaPlayerService" />
     </application>
 

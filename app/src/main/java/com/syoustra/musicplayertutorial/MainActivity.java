@@ -1,14 +1,20 @@
 package com.syoustra.musicplayertutorial;
 
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.database.Cursor;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.IBinder;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 /** MEDIA PLAYER:
  *
@@ -23,6 +29,8 @@ public class MainActivity extends AppCompatActivity {
     //TODO 13. Add global variables to bind mediaPlayer and Main Activity
     private MediaPlayerService player;
     boolean serviceBound = false;
+    //TODO 19. Create global ArrayList of Audio objects
+    ArrayList<Audio> audioList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,8 +93,31 @@ public class MainActivity extends AppCompatActivity {
             //Service is active
             //Send media with BroadcastReceiver
         }
+    }
 
+    //TODO 20. Use contentResolver to create loadAudio method
+    private void loadAudio() {
+        //TODO 21. Create contentResolver cursor
+        ContentResolver contentResolver = getContentResolver();
+        Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
+        String sortOrder = MediaStore.Audio.Media.TITLE + " ASC";
+        Cursor cursor = contentResolver.query(uri, null, selection, null, sortOrder);
 
+        //TODO 22. Cycle through data to add the media to the arrayList
+        if (cursor != null && cursor.getCount() > 0) {
+            audioList = new ArrayList<>();
+            while (cursor.moveToNext()) {
+                String data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
+                String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
+                String album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
+                String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
+
+                //Save to audioList
+                audioList.add(new Audio(data, title, album, artist));
+            }
+        }
+        cursor.close();
     }
 
 }

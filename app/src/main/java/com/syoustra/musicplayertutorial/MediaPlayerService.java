@@ -5,12 +5,12 @@ package com.syoustra.musicplayertutorial;
  **/
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
-import android.provider.MediaStore;
 import android.util.Log;
 
 import java.io.IOException;
@@ -34,6 +34,9 @@ public class MediaPlayerService extends Service implements
 
     //TODO 6. Add global variable to store pause/resume position
     private int resumePosition;
+
+    //TODO 10. Add global instance of AudioManager
+    private AudioManager audioManager;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -90,10 +93,51 @@ public class MediaPlayerService extends Service implements
         //Invoked indicating the completion of a seek operation
     }
 
+    //TODO 11. Fill in code for onAudioFocusChange
     @Override
     public void onAudioFocusChange(int focusChange) {
         //Invoked when the audio focus of the system is updated
+        switch (focusChange) {
+            case AudioManager.AUDIOFOCUS_GAIN:
+                //resume playback
+                if (mediaPlayer == null) initMediaPlayer();
+                else if (!mediaPlayer.isPlaying()) mediaPlayer.start();
+                mediaPlayer.setVolume(1.0f, 1.0f);
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS:
+                //Lost focus for an unbounded amount of time; stop playback and release player
+                if (mediaPlayer.isPlaying()) mediaPlayer.stop();
+                mediaPlayer.release();
+                mediaPlayer.null;
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                //Lost focus for a short time, but we have to stop playback. We don't release the media player because playback is likely to resume.
+                if (mediaPlayer.isPlaying()) mediaPlayer.pause();
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                //Lost focus for a short time, but it's ok to keep playing at an attenuated level
+                if (mediaPlayer.isPlaying()) mediaPlayer.setVolume(0.1f, 0.1f);
+                break;
+        }
     }
+
+    private boolean requestAudioFocus() {
+        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        int result = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            //Focus gained
+            return true;
+        }
+        //Could not gain focus
+        return false;
+    }
+
+    private boolean removeAudioFocus() { //TODO 9999 FIX THIS, AS abandonAudioFocusRequest requires API 26 and up
+        return AudioManager.AUDIOFOCUS_REQUEST_GRANTED == audioManager.abandonAudioFocusRequest(this);
+    }
+
+
+
 
     public class LocalBinder extends Binder {
         public MediaPlayerService getService() {
@@ -135,9 +179,7 @@ public class MediaPlayerService extends Service implements
     }
 
     private void stopMedia() {
-        if (mediaPlayer == null) {
-            return;
-        }
+        if (mediaPlayer == null) return;
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.stop();
         }

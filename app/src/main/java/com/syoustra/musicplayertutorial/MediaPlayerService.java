@@ -43,6 +43,36 @@ public class MediaPlayerService extends Service implements
         return iBinder;
     }
 
+    //TODO 12. Set up the Service lifecycle methods
+    //The system calls this method when an activity requests the service be started
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        try {
+            //An audio file is passed to the service through putExtra();
+            mediaFile = intent.getExtras().getString("media");
+        } catch (NullPointerException e){
+            stopSelf();
+        }
+
+        if (requestAudioFocus() == false) {
+            //Could not gain focus)
+            stopSelf();
+        }
+
+        if (mediaFile != null && mediaFile != "") initMediaPlayer();
+
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mediaPlayer != null) {
+            stopMedia();
+            mediaPlayer.release();
+        }
+        removeAudioFocus();
+    }
 
     //TODO 9. Fill in the @Override methods with the actual code
     @Override
@@ -108,7 +138,7 @@ public class MediaPlayerService extends Service implements
                 //Lost focus for an unbounded amount of time; stop playback and release player
                 if (mediaPlayer.isPlaying()) mediaPlayer.stop();
                 mediaPlayer.release();
-                mediaPlayer.null;
+                mediaPlayer = null;
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                 //Lost focus for a short time, but we have to stop playback. We don't release the media player because playback is likely to resume.

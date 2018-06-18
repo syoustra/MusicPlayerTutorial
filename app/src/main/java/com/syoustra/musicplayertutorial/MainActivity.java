@@ -36,7 +36,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        playAudio("https://upload.wikimedia.org/wikipedia/commons/6/6c/Grieg_Lyric_Pieces_Kobold.ogg");
+        //TODO 23. Adjust playAudio() to pull audio from arrayList ... MAKE SURE THERE'S MEDIA ON DEVICE
+//        playAudio("https://upload.wikimedia.org/wikipedia/commons/6/6c/Grieg_Lyric_Pieces_Kobold.ogg");
+        loadAudio();
+        //play the first audio in the arrayList
+        playAudio(audioList.get(0).getData());
+
     }
 
     //TODO 16. Lifecycle methods save, restore, destroy to prevent service from crashing the app

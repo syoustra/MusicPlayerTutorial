@@ -4,6 +4,8 @@ package com.syoustra.musicplayertutorial;
  * TUTORIAL FROM https://www.sitepoint.com/a-step-by-step-guide-to-building-an-android-audio-player-app/
  **/
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -17,6 +19,7 @@ import android.media.session.MediaSessionManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -79,8 +82,6 @@ public class MediaPlayerService extends Service implements
     public static final int NOTIFICATION_ID = 101;
 
 
-
-
     @Override
     public IBinder onBind(Intent intent) {
         return iBinder;
@@ -111,7 +112,7 @@ public class MediaPlayerService extends Service implements
         try {
             //An audio file is passed to the service through putExtra();
             mediaFile = intent.getExtras().getString("media");
-        } catch (NullPointerException e){
+        } catch (NullPointerException e) {
             stopSelf();
         }
 
@@ -243,8 +244,6 @@ public class MediaPlayerService extends Service implements
     }
 
 
-
-
     public class LocalBinder extends Binder {
         public MediaPlayerService getService() {
             return MediaPlayerService.this;
@@ -347,7 +346,6 @@ public class MediaPlayerService extends Service implements
         initMediaPlayer();
 
     }
-
 
 
     //TODO 24 Create BroadcastReceiver to listen for headphones being removed
@@ -493,7 +491,56 @@ public class MediaPlayerService extends Service implements
     //TODO 44. Add a default image to the Drawables Folder, and update link in TODO 42/43.
 
 
+    //TODO 47. Create buildNotifications() method
+    private void buildNotification(PlaybackStatus playbackStatus) {
+        int notificationAction = android.R.drawable.ic_media_pause; //needs to be initialized
+        PendingIntent play_pauseAction = null;
 
+        //Build a new notification according to the current state of the MediaPlayer
+        if (playbackStatus == PlaybackStatus.PLAYING) {
+            notificationAction = android.R.drawable.ic_media_pause;
+            //create the pause action
+            play_pauseAction = playbackAction(1);
+        } else if (playbackStatus == PlaybackStatus.PAUSED) {
+            notificationAction = android.R.drawable.ic_media_play;
+            //create the play action
+            play_pauseAction = playbackAction(0);
+        }
+
+        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.loudspeaker); // TODO 48. Replace with image, like TODO 42-44
+
+        //TODO 9999. FIX THIS: NotificationCompat.Builder IS DEPRECATED
+        //Create a new Notification
+        NotificationCompat.Builder notificationBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(this)
+                .setShowWhen(false)
+                //Set the notification style
+                .setStyle(new NotificationCompat.MediaStyle()
+                        //Attach our MediaSession token
+                        .setMediaSession(mediaSession.getSessionToken())
+                        //Show our playback controls in the compact notification view
+                        .setShowActionsInCompactView(0, 1, 2))
+                //Set the Notification color
+                .setColor(getResources().getColor(R.color.colorAccent))
+                //Set the large and small icons
+                .setLargeIcon(largeIcon)
+                .setSmallIcon(android.R.drawable.stat_sys_headset)
+                //Set Notification content information
+                .setContentText(activeAudio.getArtist())
+                .setContentTitle(activeAudio.getAlbum())
+                .setContentInfo(activeAudio.getTitle())
+                //Add playback options
+                .addAction(android.R.drawable.ic_media_previous, "previous", playbackAction(3))
+                .addAction(notificationAction, "pause", play_pauseAction)
+                .addAction(android.R.drawable.ic_media_next, "next", playbackAction(2));
+
+        ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).notify(NOTIFICATION_ID, notificationBuilder.build());
+
+        private void removeNotification() {
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.cancel(NOTIFICATION_ID);
+        }
+
+    }
 
 
     //TODO 34. Create a second BroadcastReceiver to listen for user's request for a new song
@@ -526,7 +573,6 @@ public class MediaPlayerService extends Service implements
 
         registerReceiver(playNewAudio, filter);
     }
-
 
 
 }

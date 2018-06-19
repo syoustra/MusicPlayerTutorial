@@ -170,7 +170,7 @@ public class MediaPlayerService extends Service implements
         removeAudioFocus();
         //Disable the PhoneStateListener
         if (phoneStateListener != null) {
-            telephonyManager.listen(PhoneStateListener, PhoneStateListener.LISTEN_NONE);
+            telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
         }
         //TODO 37. (removeNotification not created yet; ignore errors)
         removeNotification();
@@ -273,7 +273,7 @@ public class MediaPlayerService extends Service implements
     }
 
     private boolean removeAudioFocus() { //TODO 9999 FIX THIS, AS abandonAudioFocusRequest requires API 26 and up
-        return AudioManager.AUDIOFOCUS_REQUEST_GRANTED == audioManager.abandonAudioFocusRequest(this);
+        return AudioManager.AUDIOFOCUS_REQUEST_GRANTED == audioManager.abandonAudioFocus(this);
     }
 
 
@@ -391,7 +391,7 @@ public class MediaPlayerService extends Service implements
             //pause audio on ACTION_AUDIO_BECOMING_NOISY
             pauseMedia();
             //TODO 25 (buildNotification() not built yet, so don't worry about errors)
-            buildNotification(PlaybackStatus.Paused);
+            buildNotification(PlaybackStatus.PAUSED);
         }
     };
 
@@ -596,7 +596,7 @@ public class MediaPlayerService extends Service implements
             default:
                 break;
         }
-        return;
+        return null;
     }
 
 

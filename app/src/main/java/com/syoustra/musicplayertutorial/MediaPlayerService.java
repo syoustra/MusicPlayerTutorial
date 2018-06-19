@@ -550,6 +550,7 @@ public class MediaPlayerService extends Service implements
         NotificationCompat.Builder notificationBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(this)
                 .setShowWhen(false)
                 //Set the notification style
+                //TODO 9999. FIX THIS: MediaStyle ISN'T FOUND
                 .setStyle(new NotificationCompat.MediaStyle()
                         //Attach our MediaSession token
                         .setMediaSession(mediaSession.getSessionToken())

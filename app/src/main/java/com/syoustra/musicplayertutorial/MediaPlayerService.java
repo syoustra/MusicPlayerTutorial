@@ -305,6 +305,51 @@ public class MediaPlayerService extends Service implements
         }
     }
 
+    //TODO 45. Create methods for skipping to next/previous songs
+    private void skipToNext() {
+
+        if (audioIndex == audioList.size() - 1) {
+            //if last in playlist
+            audioIndex = 0;
+            activeAudio = audioList.get(audioIndex);
+        } else {
+            //get next in playlist
+            activeAudio = audioList.get(++audioIndex);
+        }
+
+        //Update stored index
+        new StorageUtil(getApplicationContext()).storeAudioIndex(audioIndex);
+
+        stopMedia();
+        //reset mediaPlayer
+        mediaPlayer.reset();
+        initMediaPlayer();
+    }
+
+    private void skipToPrevious() {
+
+        if (audioIndex == 0) {
+            //if first in playlist
+            //set index to last of audioList
+            audioIndex = audioList.size() - 1;
+            activeAudio = audioList.get(audioIndex);
+        } else {
+            //get previous in playlist
+            activeAudio = audioList.get(--audioIndex);
+        }
+
+        //Update stored index
+        new StorageUtil(getApplicationContext()).storeAudioIndex(audioIndex);
+
+        stopMedia();
+        //reset mediaPlayer
+        mediaPlayer.reset();
+        initMediaPlayer();
+
+    }
+
+
+
     //TODO 24 Create BroadcastReceiver to listen for headphones being removed
     //Becoming noisy
     private BroadcastReceiver becomingNoisyReceiver = new BroadcastReceiver() {
@@ -436,7 +481,7 @@ public class MediaPlayerService extends Service implements
 
     //TODO 42. Update MetaDate with song information
     private void updateMetaData() {
-        Bitmap albumArt = BitmapFactory.decodeResource(getResources(), R.drawable.image); //TODO 43. Replace with media's albumArt
+        Bitmap albumArt = BitmapFactory.decodeResource(getResources(), R.drawable.loudspeaker); //TODO 43. Replace with media's albumArt
         //Update the current metadata
         mediaSession.setMetadata(new MediaMetadataCompat.Builder()
                 .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, albumArt)
@@ -445,6 +490,7 @@ public class MediaPlayerService extends Service implements
                 .putString(MediaMetadataCompat.METADATA_KEY_TITLE, activeAudio.getTitle())
                 .build());
     }
+    //TODO 44. Add a default image to the Drawables Folder, and update link in TODO 42/43.
 
 
 

@@ -510,6 +510,7 @@ public class MediaPlayerService extends Service implements
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.loudspeaker); // TODO 48. Replace with image, like TODO 42-44
 
         //TODO 9999. FIX THIS: NotificationCompat.Builder IS DEPRECATED
+        //TODO 49. Build notification
         //Create a new Notification
         NotificationCompat.Builder notificationBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(this)
                 .setShowWhen(false)
@@ -536,12 +537,38 @@ public class MediaPlayerService extends Service implements
         ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).notify(NOTIFICATION_ID, notificationBuilder.build());
     }
 
+    //TODO 51. Create PendingIntents for playbackAction()
+    private PendingIntent playbackAction(int actionNumber) {
+        Intent playbackAction = new Intent(this, MediaPlayerService.class);
+        switch (actionNumber) {
+            case 0:
+                //Play
+                playbackAction.setAction(ACTION_PLAY);
+                return PendingIntent.getService(this, actionNumber, playbackAction, 0);
+            case 1:
+                //Pause
+                playbackAction.setAction(ACTION_PAUSE);
+                return PendingIntent.getService(this, actionNumber, playbackAction, 0);
+            case 2:
+                //Next track
+                playbackAction.setAction(ACTION_NEXT);
+                return PendingIntent.getService(this, actionNumber, playbackAction, 0);
+            case 3:
+                //Pause
+                playbackAction.setAction(ACTION_PREVIOUS);
+                return PendingIntent.getService(this, actionNumber, playbackAction, 0);
+            default:
+                break;
+        }
+        return;
+    }
+
+
+    //TODO 50. Cancel/remove notification
     private void removeNotification() {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(NOTIFICATION_ID);
     }
-
-}
 
 
     //TODO 34. Create a second BroadcastReceiver to listen for user's request for a new song

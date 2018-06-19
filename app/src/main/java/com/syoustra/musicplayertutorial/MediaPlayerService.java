@@ -5,8 +5,10 @@ package com.syoustra.musicplayertutorial;
  **/
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
@@ -228,4 +230,25 @@ public class MediaPlayerService extends Service implements
             mediaPlayer.start();
         }
     }
+
+    //TODO 24 Create BroadcastReceiver to listen for headphones being removed
+    //Becoming noisy
+    private BroadcastReceiver becomingNoisyReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            //pause audio on ACTION_AUDIO_BECOMING_NOISY
+            pauseMedia();
+            //TODO 25 (buildNotification() not built yet, so don't worry about errors)
+            buildNotification(PlaybackStatus.Paused);
+        }
+    };
+
+    //TODO 26 Register headphones-removed BroadcastReceiver
+    private void registerBecomingNoisyReceiver() {
+        //register after receiving audio focus
+        IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+        registerReceiver(becomingNoisyReceiver, intentFilter);
+    }
+
+
 }

@@ -63,6 +63,24 @@ public class MediaPlayerService extends Service implements
         return iBinder;
     }
 
+    //TODO 35. Add registration calls for the BroadcastReceivers
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        //Perform one-time setup procedures
+
+        //Manage incoming phone calls during playback
+        //Pause MediaPlayer on incoming call
+        //Resume on hangup.
+        callStateListener();
+        //ACTION_AUDIO_BECOMING_NOISY -- change in audio outputs -- BroadcastReceiver
+        registerBecomingNoisyReceiver();
+        //Listen for new Audio to play -- BroadcastReceiver
+        register_playNewAudio();
+
+    }
+
     //TODO 12. Set up the Service lifecycle methods
     //The system calls this method when an activity requests the service be started
     @Override
@@ -84,6 +102,7 @@ public class MediaPlayerService extends Service implements
         return super.onStartCommand(intent, flags, startId);
     }
 
+    //TODO 36. Update onDestroy to unregister BroadcastReceivers
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -92,6 +111,20 @@ public class MediaPlayerService extends Service implements
             mediaPlayer.release();
         }
         removeAudioFocus();
+        //Disable the PhoneStateListener
+        if (phoneStateListener != null) {
+            telephonyManager.listen(PhoneStateListener, PhoneStateListener.LISTEN_NONE);
+        }
+        //TODO 37. (removeNotification not created yet; ignore errors)
+        removeNotification();
+
+        //unregister BroadcastReceivers
+        unregisterReceiver(becomingNoisyReceiver);
+        unregisterReceiver(playNewAudio);
+
+        //clear cached playlist
+        new StorageUtil(getApplicationContext()).clearCachedAudioPlaylist();
+
     }
 
     //TODO 9. Fill in the @Override methods with the actual code

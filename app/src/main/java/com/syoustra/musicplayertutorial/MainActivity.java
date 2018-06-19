@@ -12,6 +12,8 @@ import android.os.IBinder;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -25,6 +27,11 @@ import java.util.ArrayList;
  * **/
 
 public class MainActivity extends AppCompatActivity {
+
+    private RecyclerView recyclerView;
+    private Adapter adapter;
+
+
 
     //TODO 13. Add global variables to bind mediaPlayer and Main Activity
     private MediaPlayerService player;
@@ -41,12 +48,24 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        recyclerView = findViewById(R.id.main_recycler_view);
+        setupList();
+
+
         //TODO 23. Adjust playAudio() to pull audio from arrayList ... MAKE SURE THERE'S MEDIA ON DEVICE
 //        playAudio("https://upload.wikimedia.org/wikipedia/commons/6/6c/Grieg_Lyric_Pieces_Kobold.ogg");
         loadAudio();
         //play the first audio in the arrayList
         playAudio(audioList.get(0).getData());
 
+    }
+
+    private void setupList() {
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        adapter = new Adapter(audioList);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(linearLayoutManager);
     }
 
     //TODO 16. Lifecycle methods save, restore, destroy to prevent service from crashing the app

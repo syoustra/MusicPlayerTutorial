@@ -570,6 +570,27 @@ public class MediaPlayerService extends Service implements
         notificationManager.cancel(NOTIFICATION_ID);
     }
 
+    //TODO 52. Create handlers for when user clicks on notification buttons
+    private void handleIncomingActions (Intent playbackAction) {
+        if (playbackAction == null || playbackAction.getAction() == null)
+            return;
+
+        String actionString = playbackAction.getAction();
+        if (actionString.equalsIgnoreCase(ACTION_PLAY)) {
+            transportControls.play();
+        } else if (actionString.equalsIgnoreCase(ACTION_PAUSE)) {
+            transportControls.pause();
+        } else if (actionString.equalsIgnoreCase(ACTION_NEXT)) {
+            transportControls.skipToNext();
+        } else if (actionString.equalsIgnoreCase(ACTION_PREVIOUS)) {
+            transportControls.skipToPrevious();
+        } else if (actionString.equalsIgnoreCase(ACTION_STOP)) {
+            transportControls.stop();
+        }
+    }
+
+
+
 
     //TODO 34. Create a second BroadcastReceiver to listen for user's request for a new song
     private BroadcastReceiver playNewAudio = new BroadcastReceiver() {

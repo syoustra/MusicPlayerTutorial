@@ -32,6 +32,11 @@ public class MainActivity extends AppCompatActivity {
     //TODO 19. Create global ArrayList of Audio objects
     ArrayList<Audio> audioList;
 
+    //TODO 31. Create global static String, changing to use your package name; sends broadcast intents that user has updated cache of music to play
+    public static final String Broadcast_PLAY_NEW_AUDIO = "com.syoustra.musicplayertutorial.PlayNewAudio";
+    //Change to your package name
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,16 +92,32 @@ public class MainActivity extends AppCompatActivity {
     };
 
     //TODO 15. Create new instance of MediaPlayerService and send media file to play
-    private void playAudio(String media) {
+    //TODO 32. Replace playAudio() to draw from StorageUtil list of media
+//    private void playAudio(String media) {
+    private void playAudio(int audioIndex) {
         //Check if service is active
         if (!serviceBound) {
+            //Store Serializable audioList to SharedPreferences
+            StorageUtil storage = new StorageUtil(getApplicationContext());
+            storage.storeAudio(audioList);
+            storage.storeAudioIndex(audioIndex);
+
+
             Intent playerIntent = new Intent(this, MediaPlayerService.class);
-            playerIntent.putExtra("media", media);
             startService(playerIntent);
             bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+//            playerIntent.putExtra("media", media);
+//            startService(playerIntent);
+//            bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
         } else {
+            //Store the new audioIndex to SharedPreferences
+            StorageUtil storage = new StorageUtil(getApplicationContext());
+            storage.storeAudioIndex(audioIndex);
+
             //Service is active
-            //Send media with BroadcastReceiver
+            //Send a broadcast to the service --> PLAY_NEW_AUDIO
+            Intent broadcastIntent = new Intent(Broadcast_PLAY_NEW_AUDIO);
+            sendBroadcast(broadcastIntent);
         }
     }
 

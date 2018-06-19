@@ -107,23 +107,56 @@ public class MediaPlayerService extends Service implements
 
     //TODO 12. Set up the Service lifecycle methods
     //The system calls this method when an activity requests the service be started
+    //TODO 53. Replace onStartCommand with more complete code
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         try {
-            //An audio file is passed to the service through putExtra();
-            mediaFile = intent.getExtras().getString("media");
+            //Load data from SharedPreferences
+            StorageUtil storage = new StorageUtil(getApplicationContext());
+            audioList = storage.loadAudio();
+            audioIndex = storage.loadAudioIndex();
+
+            if (audioIndex != -1 && audioIndex < audioList.size()) {
+                //index is in a valid range
+                activeAudio = audioList.get(audioIndex);
+            } else {
+                stopSelf();
+            }
         } catch (NullPointerException e) {
             stopSelf();
         }
+
+//        try {
+//            //An audio file is passed to the service through putExtra();
+//            mediaFile = intent.getExtras().getString("media");
+//        } catch (NullPointerException e) {
+//            stopSelf();
+//        }
 
         if (requestAudioFocus() == false) {
             //Could not gain focus)
             stopSelf();
         }
 
-        if (mediaFile != null && mediaFile != "") initMediaPlayer();
+        if (mediaSessionManager == null) {
+            try {
+                initMediaSession();
+                initMediaPlayer();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+                stopSelf();
+            }
+            buildNotification(PlaybackStatus.PLAYING);
+        }
 
+        //Handle Intent action from MediaSession.TransportControls
+        handleIncomingActions(intent);
         return super.onStartCommand(intent, flags, startId);
+
+
+//        if (mediaFile != null && mediaFile != "") initMediaPlayer();
+//
+//        return super.onStartCommand(intent, flags, startId);
     }
 
     //TODO 36. Update onDestroy to unregister BroadcastReceivers
@@ -267,8 +300,10 @@ public class MediaPlayerService extends Service implements
         //TODO 9999. FIX THIS, BECAUSE setAudioStreamType IS NEWLY DEPRECATED
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         try {
-            //Set the data source to the mediaFile location
-            mediaPlayer.setDataSource(mediaFile);
+            //TODO 54. Replace the setDataSource line
+//            //Set the data source to the mediaFile location
+//            mediaPlayer.setDataSource(mediaFile);
+            mediaPlayer.setDataSource(activeAudio.getData());
         } catch (IOException e) {
             e.printStackTrace();
             stopSelf();
@@ -588,7 +623,6 @@ public class MediaPlayerService extends Service implements
             transportControls.stop();
         }
     }
-
 
 
 

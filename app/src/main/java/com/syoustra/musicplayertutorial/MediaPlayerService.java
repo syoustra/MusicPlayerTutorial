@@ -297,7 +297,7 @@ public class MediaPlayerService extends Service implements
         //Reset so that the media player is not pointing to another data source
         mediaPlayer.reset();
 
-        //TODO 9999. FIX THIS, BECAUSE setAudioStreamType IS NEWLY DEPRECATED
+        //TODO 9999. FIX THIS, BECAUSE setAudioStreamType IS NEWLY DEPRECATED (except now it's not showing as an error???)
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         try {
             //TODO 54. Replace the setDataSource line
@@ -547,10 +547,12 @@ public class MediaPlayerService extends Service implements
         //TODO 9999. FIX THIS: NotificationCompat.Builder IS DEPRECATED
         //TODO 49. Build notification
         //Create a new Notification
+        //TODO ********************************************* DEPRECATED, MIGHT BE PART OF THE ISSUE BELOW ********************
         NotificationCompat.Builder notificationBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(this)
                 .setShowWhen(false)
                 //Set the notification style
                 //TODO 9999. FIX THIS: MediaStyle ISN'T FOUND
+                //TODO ******************************** I COULD NOT FIGURE THIS ONE OUT (yet) ... BUT COMMENTING BLOCK IS OK, I BELIEVE *********
                 .setStyle(new NotificationCompat.MediaStyle()
                         //Attach our MediaSession token
                         .setMediaSession(mediaSession.getSessionToken())

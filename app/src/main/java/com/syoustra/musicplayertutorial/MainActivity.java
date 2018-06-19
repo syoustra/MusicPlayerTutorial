@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
 //        playAudio("https://upload.wikimedia.org/wikipedia/commons/6/6c/Grieg_Lyric_Pieces_Kobold.ogg");
         loadAudio();
         //play the first audio in the arrayList
+        //TODO ******************** THIS LINE ISN'T HAPPY (but I think it may be just a test line ****************
         playAudio(audioList.get(0).getData());
 
     }

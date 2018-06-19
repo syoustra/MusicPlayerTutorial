@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.session.PlaybackState;
 import android.os.Binder;
 import android.os.IBinder;
 import android.telephony.PhoneStateListener;
@@ -18,6 +19,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 //TODO 2. Create the Media Player Service and basic shell of related methods/binder inner class
 public class MediaPlayerService extends Service implements
@@ -48,6 +50,10 @@ public class MediaPlayerService extends Service implements
     private PhoneStateListener phoneStateListener;
     private TelephonyManager telephonyManager;
 
+    //TODO 33. Add global variables for the list of songs
+    private ArrayList<Audio> audioList;
+    private int audioIndex = -1;
+    private Audio activeAudio; //an object of the currently-playing audio
 
 
 
@@ -300,6 +306,37 @@ public class MediaPlayerService extends Service implements
         //Listen for changes to the device call state
         telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
 
+    }
+
+    //TODO 34. Create a second BroadcastReceiver to listen for user's request for a new song
+    private BroadcastReceiver playNewAudio = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            //Get the new media index from SharedPreferences
+            audioIndex = new StorageUtil(getApplicationContext()).loadAudioIndex();
+            if (audioIndex != -1 && audioIndex < audioList.size()) {
+                //index is in valid range
+                activeAudio = audioList.get(audioIndex);
+            } else {
+                stopSelf();
+            }
+
+            //A PLAY_NEW_AUDIO action received
+            //reset mediaPlayer to play the new Audio
+            stopMedia();
+            mediaPlayer.reset();
+            initMediaPlayer();
+            updateMetaData();
+            buildNotification(PlaybackStatus.PLAYING);
+        }
+
+    };
+
+    private void register_playNewAudio() {
+        //Register playNewMedia receiver
+        IntentFilter filter = new IntentFilter(MainActivity.Broadcast_PLAY_NEW_AUDIO);
+
+        registerReceiver(playNewAudio, filter);
     }
 
 
